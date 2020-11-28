@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2009-2016 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="crmsys1111.mapper.EmpSqlMapper">
+<!--
+<resultMap>中
+id: 给resultMap起个id
+type: 查询结果中的每一行转成的类型
+--><resultMap id="empResultMapJoin" type="Emp">
+<!--
+<id>（一般代表主键）
+<result>（一般代表返回值）
+
+property（属性）：对应emp表中的属性，例如（empid）
+column：和查询结果中的列，例如（empid）
+-->     <id property="empid" column="empid"/>
+        <result property="empname" column="empname"/>
+        <result property="salary" column="salary"/>
+        <result property="email" column="email"/>
+        <result property="tel" column="tel"/>
+        <association property="dept" javaType="Dept">
+            <id property="deptid" column="deptid"/>
+            <result property="deptname" column="deptname"/>
+            <result property="deptinfo" column="deptinfo"/>
+        </association>
+</resultMap>
+
+<!--
+    <resultMap>中
+    id: 给resultMap起个id
+    type: 查询结果中的每一行转成的类型
+--> <resultMap id="empResultMap" type="Emp">
+<!--
+    <id>（一般代表主键）
+    <result>（一般代表返回值）
+
+    property（属性）：对应emp表中的属性，例如（empid）
+    column：和查询结果中的列，例如（empid）
+-->     <id property="empid" column="empid"/>
+        <association column="deptid" property="dept" javaType="Dept" select="crmsys1111.mapper.DeptSqlMapper.selectDeptById"/>
+</resultMap>
+
+    <select id="getAllEmps" resultMap="empResultMap">
+        SELECT * FROM emp ORDER BY empid DESC
+    </select>
+    <select id="getEmpsById" parameterType="int" resultMap="empResultMapJoin">
+        SELECT * FROM emp INNER JOIN dept ON emp.deptid=dept.deptid WHERE empid=#{_parameter}
+    </select>
+    <select id="countEmpByDeptId" parameterType="int" resultType="int">
+        SELECT COUNT(empid) FROM emp WHERE deptid=#{_parameter}
+    </select>
+    <insert id="insertEmp" parameterType="Emp">
+        INSERT INTO emp(empname,salary,email,tel,deptid)VALUES(#{empname},#{salary},#{email},#{tel},#{dept.deptid})
+    </insert>
+    <update id="updateEmpById" parameterType="Emp">
+        UPDATE emp SET empname=#{empname},salary=#{salary},email=#{email},tel=#{tel},deptid=#{dept.deptid} WHERE empid=#{empid}
+    </update>
+    <delete id="deleteEmpById" parameterType="int">
+        DELETE FROM emp WHERE empid=#{_parameter}
+    </delete>
+
+</mapper>
